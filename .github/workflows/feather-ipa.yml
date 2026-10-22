@@ -1,0 +1,31 @@
+name: Build Feather IPA
+concurrency:
+  group: feather-build
+  cancel-in-progress: false
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/feather-ipa.yml
+      - build_feather.py
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: xcode-27
+    timeout-minutes: 45
+    steps:
+      - name: Check out build instructions
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select newest installed iOS 27.2 SDK and build
+        run: python3 build_feather.py
+      - name: Save IPA and provenance
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Feather-7078b05-iOS27.2
+          path: output/*
+          if-no-files-found: error
+          retention-days: 7
